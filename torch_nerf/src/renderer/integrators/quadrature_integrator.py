@@ -8,6 +8,7 @@ from typeguard import typechecked
 from jaxtyping import Float, jaxtyped
 import torch
 from torch_nerf.src.renderer.integrators.integrator_base import IntegratorBase
+import time
 
 
 class QuadratureIntegrator(IntegratorBase):
@@ -43,4 +44,16 @@ class QuadratureIntegrator(IntegratorBase):
         """
         # TODO
         # HINT: Look up the documentation of 'torch.cumsum'.
-        raise NotImplementedError("Task 3")
+
+        st = time.time()
+        alpha = 1.0 - torch.exp(-sigma * delta)
+        transmittance = torch.exp(torch.cumsum(-sigma*delta, dim=1))
+        weights = alpha * transmittance
+        weights_expand = weights.unsqueeze(0).repeat(3, 1, 1).permute(1, 2, 0)
+
+        rgbs = (weights_expand * radiance).sum(dim=1) 
+        # print(f">>>integrate_along_rays: {time.time() - st} device = {alpha.device}")
+
+        return rgbs, weights
+
+        # raise NotImplementedError("Task 3")

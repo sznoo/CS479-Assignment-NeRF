@@ -35,7 +35,39 @@ class NeRF(nn.Module):
         super().__init__()
 
         # TODO
-        raise NotImplementedError("Task 1")
+        self.fc = nn.Sequential(
+            nn.Linear(pos_dim, feat_dim), 
+            nn.ReLU(), 
+            nn.Linear(feat_dim, feat_dim), 
+            nn.ReLU(), 
+            nn.Linear(feat_dim, feat_dim), 
+            nn.ReLU(), 
+            nn.Linear(feat_dim, feat_dim), 
+            nn.ReLU(), 
+            nn.Linear(feat_dim, feat_dim), 
+            nn.ReLU()
+        )
+        
+        self.fc_skip1 = nn.Sequential(
+            nn.Linear(feat_dim+pos_dim, feat_dim), 
+            nn.ReLU(),
+            nn.Linear(feat_dim, feat_dim), 
+            nn.ReLU(),
+            nn.Linear(feat_dim, feat_dim), 
+            nn.ReLU(),
+            nn.Linear(feat_dim, feat_dim), 
+            nn.ReLU()
+        )
+        self.sigma = nn.Sequential(
+            nn.Linear(feat_dim, 1), 
+            nn.ReLU()
+        )
+        self.color = nn.Sequential(
+            nn.Linear(feat_dim+view_dir_dim, feat_dim//2), 
+            nn.ReLU(),
+            nn.Linear(feat_dim//2, 3),
+            nn.Sigmoid()
+        )
 
     @jaxtyped
     @typechecked
@@ -60,4 +92,13 @@ class NeRF(nn.Module):
         """
 
         # TODO
-        raise NotImplementedError("Task 1")
+        pos = pos.to("cuda:0")
+        x = self.fc(pos)
+        x = torch.cat([x, pos], dim = 1)
+        x = self.fc_skip1(x)
+        sigma = self.sigma(x)
+        x = torch.cat([x, view_dir], dim = 1)
+        radiance = self.color(x)
+
+
+        return sigma, radiance

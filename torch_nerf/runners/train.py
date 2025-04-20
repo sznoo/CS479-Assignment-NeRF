@@ -17,7 +17,6 @@ import torchmetrics
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 from tqdm import tqdm
 
-
 from torch_nerf.runners.utils import (
     init_cuda,
     init_dataset_and_loader,
@@ -99,8 +98,11 @@ def train_one_epoch(
     device = torch.device(device_idx)
 
     loss_dict = {}
-
+    i = 0
+    print(f">>>train_one_epoch: memAlloc = {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
+    # print(f">>>                 memReserve = {torch.cuda.memory_reserved() / 1024**2:.2f} MB")
     for batch in loader:
+        i+=1
 
         loss = 0.0
 
