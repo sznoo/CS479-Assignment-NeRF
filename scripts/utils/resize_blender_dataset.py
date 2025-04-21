@@ -31,7 +31,7 @@ def parse_args() -> argparse.Namespace:
 
 def main(args: argparse.Namespace) -> None:
     """The entrypoint of the script"""
-    
+
     # =========================================================================
     # parse arguments
     dataset_path = Path(args.dataset_path).resolve()
@@ -46,7 +46,6 @@ def main(args: argparse.Namespace) -> None:
     print(f"[!] Created directory: {output_dir}")
     # =========================================================================
 
-
     # =========================================================================
     # copy metadata files
     metadata_train = dataset_path / "transforms_train.json"
@@ -55,7 +54,7 @@ def main(args: argparse.Namespace) -> None:
     assert metadata_val.exists(), f"File {str(metadata_val)} does not exist"
     metadata_test = dataset_path / "transforms_test.json"
     assert metadata_test.exists(), f"File {str(metadata_test)} does not exist"
-    
+
     shutil.copy(metadata_train, output_dir)
     shutil.copy(metadata_val, output_dir)
     shutil.copy(metadata_test, output_dir)
@@ -69,14 +68,14 @@ def main(args: argparse.Namespace) -> None:
     assert images_val.exists(), f"Directory {str(images_val)} does not exist"
     images_test = dataset_path / "test"
     assert images_test.exists(), f"Directory {str(images_test)} does not exist"
-    
+
     images_train_output = output_dir / "train"
     images_train_output.mkdir(exist_ok=True, parents=True)
     images_val_output = output_dir / "val"
     images_val_output.mkdir(exist_ok=True, parents=True)
     images_test_output = output_dir / "test"
     images_test_output.mkdir(exist_ok=True, parents=True)
-    
+
     shutil.copytree(images_train, images_train_output, dirs_exist_ok=True)
     shutil.copytree(images_val, images_val_output, dirs_exist_ok=True)
     shutil.copytree(images_test, images_test_output, dirs_exist_ok=True)
@@ -113,7 +112,7 @@ def main(args: argparse.Namespace) -> None:
             interpolation=cv2.INTER_AREA,
         )
         cv2.imwrite(str(image_path), image)
-    
+
     print("[!] Successfully resized images")
     # =========================================================================
 

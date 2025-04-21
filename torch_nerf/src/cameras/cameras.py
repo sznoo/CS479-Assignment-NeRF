@@ -12,6 +12,7 @@ from typeguard import typechecked
 
 from torch_nerf.src.cameras.rays import RayBundle
 
+
 @dataclass(init=False)
 class Camera:
     """
@@ -71,15 +72,22 @@ class Camera:
         # cast numeric values to tensors
         for variable, value in vars(self).items():
             if isinstance(value, int):
-                setattr(self, variable, torch.tensor(getattr(self, variable), dtype=torch.int))
+                setattr(
+                    self,
+                    variable,
+                    torch.tensor(getattr(self, variable), dtype=torch.int),
+                )
             elif isinstance(value, float):
-                setattr(self, variable, torch.tensor(getattr(self, variable), dtype=torch.float))
+                setattr(
+                    self,
+                    variable,
+                    torch.tensor(getattr(self, variable), dtype=torch.float),
+                )
 
         # transfer tensors to device
         for variable, value in vars(self).items():
             if isinstance(value, torch.Tensor):
                 setattr(self, variable, getattr(self, variable).to(device))
-
 
     def __len__(self) -> int:
         """
@@ -92,7 +100,7 @@ class Camera:
     def generate_screen_coords(self) -> Int[Tensor, "num_pixel 2"]:
         """
         Generates screen coordinates corresponding to image pixels.
-        
+
         The origin of the coordinate frame is located at the top left corner
         of an image, with the x-axis pointing to the right and the y-axis pointing
         downwards.

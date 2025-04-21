@@ -25,13 +25,17 @@ class StratifiedSampler(RaySamplerBase):
         ray_bundle: RayBundle,
         num_sample: int,
         importance_weights: Optional[Float[torch.Tensor, "num_ray num_sample"]] = None,
-        importance_t_samples: Optional[Float[torch.Tensor, "num_ray num_sample"]] = None,
+        importance_t_samples: Optional[
+            Float[torch.Tensor, "num_ray num_sample"]
+        ] = None,
     ) -> RaySamples:
         """
         Samples points along rays.
         """
         if not importance_weights is None:
-            assert not importance_t_samples is None, "Previous samples must be provided."
+            assert (
+                not importance_t_samples is None
+            ), "Previous samples must be provided."
             t_samples = self.sample_along_rays_importance(
                 importance_weights,
                 importance_t_samples,
@@ -52,13 +56,13 @@ class StratifiedSampler(RaySamplerBase):
     ) -> Float[torch.Tensor, "num_ray num_sample"]:
         """
         Performs uniform sampling of points along rays.
-        
+
         Args:
             ray_bundle: A ray bundle holding ray origins, directions, near and far bounds.
             num_sample: The number of samples to be generated along each ray.
-        
+
         Returns:
-            t_samples: The distance values sampled along rays. 
+            t_samples: The distance values sampled along rays.
                 The values should lie in the range defined by the near and
                 far bounds of the ray bundle.
         """
@@ -66,30 +70,24 @@ class StratifiedSampler(RaySamplerBase):
         # TODO
         # HINT: Freely use the provided methods 'create_t_bins' and 'map_t_to_euclidean'
         torch.cuda.empty_cache()
-        # gc.collect()
         batch_size, _ = ray_bundle.origins.shape
         device = ray_bundle.origins.device
 
-        samples_local = torch.rand((batch_size, num_sample)).to("cuda:0")
-        bins = self.create_t_bins(num_sample+1, samples_local.device)[:-1]
-        bins_t = bins.unsqueeze(0).repeat(batch_size, 1).reshape(-1).view(batch_size, num_sample)
-        samples = samples_local * (1/num_sample) + bins_t
+        samples_local = torch.rand((batch_size, num_sample))
+        bins = self.create_t_bins(num_sample + 1, samples_local.device)[:-1]
+        bins_t = (
+            bins.unsqueeze(0)
+            .repeat(batch_size, 1)
+            .reshape(-1)
+            .view(batch_size, num_sample)
+        )
+        samples = samples_local * (1 / num_sample) + bins_t
 
         r_f0 = ray_bundle.fars[0].item()
         r_n0 = ray_bundle.nears[0].item()
-        t_samples = self.map_t_to_euclidean(samples, r_n0, r_f0)
+        t_samples = self.map_t_to_euclidean(samples, r_n0, r_f0).to(device)
 
-        for i in range(batch_size):
-            r_f = ray_bundle.fars[i].item()
-            r_n = ray_bundle.nears[i].item()
-            if r_f == r_f0 and r_n == r_n0:
-                continue
-
-            t_samples[i, :] = self.map_t_to_euclidean(samples[i, :], r_n, r_f)
-        # print(f">>>sample_along_rays_uniform: {time.time() - st}  device = {t_samples.device}")
-
-        return t_samples.to(device)
-        
+        return t_samples
 
     @jaxtyped
     @typechecked
@@ -139,9 +137,9 @@ class StratifiedSampler(RaySamplerBase):
         """
         Generates samples of t's by subdividing the interval [0.0, 1.0] inclusively.
         """
-        assert isinstance(num_bin, int), (
-            f"Expected an integer for parameter 'num_samples'. Got a value of type {type(num_bin)}."
-        )
+        assert isinstance(
+            num_bin, int
+        ), f"Expected an integer for parameter 'num_samples'. Got a value of type {type(num_bin)}."
         t_bins = torch.linspace(0.0, 1.0, num_bin, device=device)
 
         return t_bins

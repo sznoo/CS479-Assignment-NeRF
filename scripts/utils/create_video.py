@@ -13,7 +13,9 @@ args = parser.parse_args()
 
 
 def main():
-    files = [os.path.join(args.img_dir, file) for file in sorted(os.listdir(args.img_dir))]
+    files = [
+        os.path.join(args.img_dir, file) for file in sorted(os.listdir(args.img_dir))
+    ]
     imgs = [imageio.imread(file) for file in files]
 
     w = imageio.get_writer(

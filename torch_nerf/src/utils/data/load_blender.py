@@ -172,7 +172,11 @@ def load_blender_data(
 
     # camera extrinsics for image rendering
     render_poses = torch.stack(
-        [pose_spherical(angle, -30.0, 4.0) for angle in np.linspace(-180, 180, 40 + 1)[:-1]], 0
+        [
+            pose_spherical(angle, -30.0, 4.0)
+            for angle in np.linspace(-180, 180, 40 + 1)[:-1]
+        ],
+        0,
     )
 
     if half_res:
@@ -180,7 +184,9 @@ def load_blender_data(
         img_width = img_width // 2
         focal = focal / 2.0
 
-        imgs_half_res = np.zeros((imgs.shape[0], img_height, img_width, 4), dtype=np.float32)
+        imgs_half_res = np.zeros(
+            (imgs.shape[0], img_height, img_width, 4), dtype=np.float32
+        )
         for i, img in enumerate(imgs):
             imgs_half_res[i] = cv2.resize(
                 img, (img_width, img_height), interpolation=cv2.INTER_AREA

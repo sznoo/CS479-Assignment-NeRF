@@ -36,37 +36,32 @@ class NeRF(nn.Module):
 
         # TODO
         self.fc = nn.Sequential(
-            nn.Linear(pos_dim, feat_dim), 
-            nn.ReLU(), 
-            nn.Linear(feat_dim, feat_dim), 
-            nn.ReLU(), 
-            nn.Linear(feat_dim, feat_dim), 
-            nn.ReLU(), 
-            nn.Linear(feat_dim, feat_dim), 
-            nn.ReLU(), 
-            nn.Linear(feat_dim, feat_dim), 
-            nn.ReLU()
+            nn.Linear(pos_dim, feat_dim),
+            nn.ReLU(),
+            nn.Linear(feat_dim, feat_dim),
+            nn.ReLU(),
+            nn.Linear(feat_dim, feat_dim),
+            nn.ReLU(),
+            nn.Linear(feat_dim, feat_dim),
+            nn.ReLU(),
+            nn.Linear(feat_dim, feat_dim),
         )
-        
+
         self.fc_skip1 = nn.Sequential(
-            nn.Linear(feat_dim+pos_dim, feat_dim), 
+            nn.Linear(feat_dim + pos_dim, feat_dim),
             nn.ReLU(),
-            nn.Linear(feat_dim, feat_dim), 
+            nn.Linear(feat_dim, feat_dim),
             nn.ReLU(),
-            nn.Linear(feat_dim, feat_dim), 
+            nn.Linear(feat_dim, feat_dim),
             nn.ReLU(),
-            nn.Linear(feat_dim, feat_dim), 
-            nn.ReLU()
+            nn.Linear(feat_dim, feat_dim),
         )
-        self.sigma = nn.Sequential(
-            nn.Linear(feat_dim, 1), 
-            nn.ReLU()
-        )
+        self.sigma = nn.Sequential(nn.Linear(feat_dim, 1), nn.ReLU())
         self.color = nn.Sequential(
-            nn.Linear(feat_dim+view_dir_dim, feat_dim//2), 
+            nn.Linear(feat_dim + view_dir_dim, feat_dim // 2),
             nn.ReLU(),
-            nn.Linear(feat_dim//2, 3),
-            nn.Sigmoid()
+            nn.Linear(feat_dim // 2, 3),
+            nn.Sigmoid(),
         )
 
     @jaxtyped
@@ -75,7 +70,9 @@ class NeRF(nn.Module):
         self,
         pos: Float[torch.Tensor, "num_sample pos_dim"],
         view_dir: Float[torch.Tensor, "num_sample view_dir_dim"],
-    ) -> Tuple[Float[torch.Tensor, "num_sample 1"], Float[torch.Tensor, "num_sample 3"]]:
+    ) -> Tuple[
+        Float[torch.Tensor, "num_sample 1"], Float[torch.Tensor, "num_sample 3"]
+    ]:
         """
         Predicts color and density.
 
@@ -92,13 +89,12 @@ class NeRF(nn.Module):
         """
 
         # TODO
-        pos = pos.to("cuda:0")
+        # pos = pos.to("cuda:0")
         x = self.fc(pos)
-        x = torch.cat([x, pos], dim = 1)
+        x = torch.cat([pos, x], dim=1)
         x = self.fc_skip1(x)
         sigma = self.sigma(x)
-        x = torch.cat([x, view_dir], dim = 1)
+        x = torch.cat([x, view_dir], dim=1)
         radiance = self.color(x)
-
 
         return sigma, radiance

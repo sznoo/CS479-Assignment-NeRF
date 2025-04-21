@@ -46,7 +46,9 @@ def sample_pdf(
     # approximate the CDF to a linear function within each interval
     denom = cdf_upper - cdf_lower
     denom = torch.where(denom < 1e-5, torch.ones_like(denom), denom)
-    t = (cdf_ys - cdf_lower) / denom  # i.e., cdf_y = cdf_lower + t * (cdf_upper - cdf_lower)
+    t = (
+        cdf_ys - cdf_lower
+    ) / denom  # i.e., cdf_y = cdf_lower + t * (cdf_upper - cdf_lower)
     t_samples = bins_lower + t * (bins_upper - bins_lower)
 
     assert torch.isnan(t_samples).sum() == 0

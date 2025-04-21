@@ -89,16 +89,18 @@ class VolumeRenderer(object):
         pts_chunks = torch.chunk(sample_pts, num_batch, dim=0)
         dir_chunks = torch.chunk(ray_dir, num_batch, dim=0)
         delta_chunks = torch.chunk(delta_t, num_batch, dim=0)
-        assert len(pts_chunks) == len(dir_chunks) == len(delta_chunks), (
-            f"{len(pts_chunks)} {len(dir_chunks)} {len(delta_chunks)}"
-        )
+        assert (
+            len(pts_chunks) == len(dir_chunks) == len(delta_chunks)
+        ), f"{len(pts_chunks)} {len(dir_chunks)} {len(delta_chunks)}"
 
         for pts_batch, dir_batch, delta_batch in zip(
             pts_chunks, dir_chunks, delta_chunks
         ):
 
             # query the scene to get density and radiance
-            sigma_batch, radiance_batch = target_scene.query_points(pts_batch, dir_batch)
+            sigma_batch, radiance_batch = target_scene.query_points(
+                pts_batch, dir_batch
+            )
 
             # compute pixel colors by evaluating the volume rendering equation
             rgb_batch, weights_batch = self.integrator.integrate_along_rays(

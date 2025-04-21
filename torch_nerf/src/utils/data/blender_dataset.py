@@ -32,7 +32,16 @@ class NeRFBlenderDataset(data.Dataset):
             raise ValueError(
                 f"Unsupported dataset type. Expected one of {data_types}. Got {data_type}"
             )
-        scene_names = ["chair", "drums", "ficus", "hotdog", "lego", "materials", "mic", "ship"]
+        scene_names = [
+            "chair",
+            "drums",
+            "ficus",
+            "hotdog",
+            "lego",
+            "materials",
+            "mic",
+            "ship",
+        ]
         if not scene_name in scene_names:
             raise ValueError(
                 f"Unsupported scene type. Expected one of {scene_names}. Got {scene_name}."
@@ -61,7 +70,9 @@ class NeRFBlenderDataset(data.Dataset):
 
         # RGBA -> RGB
         if self._white_bg:
-            self._imgs = self._imgs[..., :3] * self._imgs[..., -1:] + (1.0 - self._imgs[..., -1:])
+            self._imgs = self._imgs[..., :3] * self._imgs[..., -1:] + (
+                1.0 - self._imgs[..., -1:]
+            )
         self._imgs = self._imgs[..., :3]
 
         # (4, 4) -> (3, 4)

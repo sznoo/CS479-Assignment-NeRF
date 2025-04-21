@@ -40,7 +40,16 @@ class LLFFDataset(data.Dataset):
             spherify (bool):
         """
         # check arguments
-        scene_names = ["fern", "flower", "fortress", "horns", "leaves", "orchids", "room", "trex"]
+        scene_names = [
+            "fern",
+            "flower",
+            "fortress",
+            "horns",
+            "leaves",
+            "orchids",
+            "room",
+            "trex",
+        ]
         if not scene_name in scene_names:
             raise ValueError(
                 f"Unsupported scene type. Expected one of {scene_names}. Got {scene_name}."

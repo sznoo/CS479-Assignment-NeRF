@@ -70,7 +70,6 @@ class PrimitiveCube(PrimitiveBase):
         view_dir = view_dir.repeat(1, num_sample, 1)
         ####
 
-
         if not self.encoders is None:  # encode input signals
             if "coord_enc" in self.encoders.keys():
                 pos = self.encoders["coord_enc"].encode(
@@ -83,7 +82,9 @@ class PrimitiveCube(PrimitiveBase):
 
         sigma, radiance = self._radiance_field(pos, view_dir)
 
-        return sigma.reshape(num_ray, num_sample), radiance.reshape(num_ray, num_sample, -1)
+        return sigma.reshape(num_ray, num_sample), radiance.reshape(
+            num_ray, num_sample, -1
+        )
 
     @property
     def radiance_field(self) -> torch.nn.Module:

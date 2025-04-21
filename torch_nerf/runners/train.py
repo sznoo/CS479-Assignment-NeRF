@@ -32,6 +32,8 @@ from torch_nerf.runners.utils import (
 import torch_nerf.src.cameras.cameras as cameras
 from torch_nerf.src.utils.data import NeRFBlenderDataset, LLFFDataset
 
+import time
+
 
 def init_dataset_and_loader(cfg: DictConfig):
     """
@@ -96,14 +98,8 @@ def train_one_epoch(
 
     device_idx = torch.cuda.current_device()
     device = torch.device(device_idx)
-
     loss_dict = {}
-    i = 0
-    print(f">>>train_one_epoch: memAlloc = {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
-    # print(f">>>                 memReserve = {torch.cuda.memory_reserved() / 1024**2:.2f} MB")
     for batch in loader:
-        i+=1
-
         loss = 0.0
 
         # parse batch
@@ -154,7 +150,9 @@ def train_one_epoch(
             )
 
             center_indices = torch.cartesian_prod(center_is, center_js)
-            center_indices = center_indices[:, 0] * dataset.img_width + center_indices[:, 1]
+            center_indices = (
+                center_indices[:, 0] * dataset.img_width + center_indices[:, 1]
+            )
             pixel_indices = center_indices[
                 torch.randperm(len(center_indices))[: cfg.renderer.num_pixels]
             ]
@@ -167,8 +165,10 @@ def train_one_epoch(
             cfg.renderer.num_samples_coarse,
             cfg.renderer.project_to_ndc,
         )
-        coarse_loss = loss_func(pixel_gt[pixel_indices, ...].to(coarse_pred), coarse_pred)
-        loss += coarse_loss
+        coarse_loss = loss_func(
+            pixel_gt[pixel_indices, ...].to(coarse_pred), coarse_pred
+        )
+        # loss += coarse_loss
         if "coarse_loss" not in loss_dict:
             loss_dict["coarse_loss"] = coarse_loss.item()
         else:
@@ -220,7 +220,7 @@ def validate_one_epoch(
     dataset,
     loader,
     fine_scene=None,
- ):
+):
     """
     Validation routine for one epoch.
     """
@@ -230,7 +230,7 @@ def validate_one_epoch(
 
     # initialize metrics
     lpips = LearnedPerceptualImagePatchSimilarity(
-        net_type='vgg',
+        net_type="vgg",
         normalize=True,
     ).to(device)
     psnr = torchmetrics.PeakSignalNoiseRatio().to(device)
@@ -355,11 +355,15 @@ def main(cfg: DictConfig) -> None:
 
         # identify existing log directory
         log_dir = Path(cfg.log_dir)
-        assert log_dir.exists(), f"Provided log directory {str(log_dir)} does not exist."
+        assert (
+            log_dir.exists()
+        ), f"Provided log directory {str(log_dir)} does not exist."
 
         # override the current config with the existing one
         config_dir = log_dir / ".hydra"
-        assert config_dir.exists(), "Provided log directory does not contain config directory."
+        assert (
+            config_dir.exists()
+        ), "Provided log directory does not contain config directory."
         cfg = OmegaConf.load(config_dir / "config.yaml")
 
     # initialize Tensorboard writer
@@ -400,7 +404,9 @@ def main(cfg: DictConfig) -> None:
         scheduler,
     )
 
-    for epoch in tqdm(range(start_epoch, cfg.train_params.optim.num_iter // len(train_dataset))):
+    for epoch in tqdm(
+        range(start_epoch, cfg.train_params.optim.num_iter // len(train_dataset))
+    ):
 
         # train
         train_loss_dict = train_one_epoch(

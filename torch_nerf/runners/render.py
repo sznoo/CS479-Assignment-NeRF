@@ -145,7 +145,9 @@ def main(cfg: DictConfig) -> None:
 
     # override the current config with the existing one
     config_dir = log_dir / ".hydra"
-    assert config_dir.exists(), "Provided log directory does not contain config directory."
+    assert (
+        config_dir.exists()
+    ), "Provided log directory does not contain config directory."
     cfg = OmegaConf.load(config_dir / "config.yaml")
 
     # initialize CUDA device
@@ -169,9 +171,7 @@ def main(cfg: DictConfig) -> None:
 
     # find the latest checkpoint
     ckpt_dir = log_dir / "ckpt"
-    assert ckpt_dir.exists(), (
-        f"Checkpoint directory {str(ckpt_dir)} does not exist."
-    )
+    assert ckpt_dir.exists(), f"Checkpoint directory {str(ckpt_dir)} does not exist."
 
     # load checkpoint
     _ = load_ckpt(
@@ -190,14 +190,10 @@ def main(cfg: DictConfig) -> None:
         save_dir = render_dir / "test_views"
     save_dir = save_dir / datetime.now().strftime("%Y%m%d-%H%M%S")
     save_dir.mkdir(exist_ok=True, parents=True)
-    print(
-        f"Rendering outputs will be saved under: {str(save_dir)}"
-    )
+    print(f"Rendering outputs will be saved under: {str(save_dir)}")
 
     poses = dataset._render_poses
-    image_fnames = [
-        str(i).zfill(6) for i in range(len(poses))
-    ]
+    image_fnames = [str(i).zfill(6) for i in range(len(poses))]
     if render_test_views:
         poses = torch.tensor(dataset._poses)
         image_fnames = dataset._img_fnames
@@ -205,17 +201,17 @@ def main(cfg: DictConfig) -> None:
 
         # render
         rendered_img = render_scene(
-          cfg,
-          default_scene,
-          fine_scene,
-          renderer,
-          intrinsic={
-            "f_x": dataset.focal_length,
-            "f_y": dataset.focal_length,
-            "img_width": dataset.img_width,
-            "img_height": dataset.img_height,  
-          },
-          extrinsic=pose,
+            cfg,
+            default_scene,
+            fine_scene,
+            renderer,
+            intrinsic={
+                "f_x": dataset.focal_length,
+                "f_y": dataset.focal_length,
+                "img_width": dataset.img_width,
+                "img_height": dataset.img_height,
+            },
+            extrinsic=pose,
         )
 
         # save

@@ -48,7 +48,11 @@ def _minify(
 
     img_dir = os.path.join(base_dir, "images")
     imgs = [os.path.join(img_dir, f) for f in sorted(os.listdir(img_dir))]
-    imgs = [f for f in imgs if any([f.endswith(ex) for ex in ["JPG", "jpg", "png", "jpeg", "PNG"]])]
+    imgs = [
+        f
+        for f in imgs
+        if any([f.endswith(ex) for ex in ["JPG", "jpg", "png", "jpeg", "PNG"]])
+    ]
     img_dir_orig = img_dir
 
     cwd = os.getcwd()
@@ -340,10 +344,12 @@ def render_path_spiral(
     for theta in np.linspace(0.0, 2.0 * np.pi * rots, num_keyframe + 1)[:-1]:
         camera_position = np.dot(
             camera_to_world[:3, :4],
-            np.array([np.cos(theta), -np.sin(theta), -np.sin(theta * z_rate), 1.0]) * radiuses,
+            np.array([np.cos(theta), -np.sin(theta), -np.sin(theta * z_rate), 1.0])
+            * radiuses,
         )
         z_vec = normalize(
-            camera_position - np.dot(camera_to_world[:3, :4], np.array([0, 0, -focal, 1.0]))
+            camera_position
+            - np.dot(camera_to_world[:3, :4], np.array([0, 0, -focal, 1.0]))
         )
         render_poses.append(build_extrinsic(z_vec, up_vec, camera_position))
 
@@ -451,7 +457,10 @@ def spherify_poses(
         [new_poses, np.broadcast_to(poses[0, :3, -1:], new_poses[:, :3, -1:].shape)], -1
     )
     poses_reset = np.concatenate(
-        [poses_reset[:, :3, :4], np.broadcast_to(poses[0, :3, -1:], poses_reset[:, :3, -1:].shape)],
+        [
+            poses_reset[:, :3, :4],
+            np.broadcast_to(poses[0, :3, -1:], poses_reset[:, :3, -1:].shape),
+        ],
         -1,
     )
 
@@ -559,7 +568,7 @@ def load_llff_data(
     render_poses = np.array(render_poses).astype(np.float32)
 
     avg_camera_to_world = poses_avg(extrinsics)
-    
+
     dists = np.sum(np.square(avg_camera_to_world[:3, 3] - extrinsics[:, :3, 3]), -1)
     i_test = int(np.argmin(dists))
     print("HOLDOUT view is", i_test)
