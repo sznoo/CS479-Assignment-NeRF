@@ -8,7 +8,6 @@ from typeguard import typechecked
 from jaxtyping import Float, jaxtyped
 import torch
 from torch_nerf.src.renderer.integrators.integrator_base import IntegratorBase
-import time
 
 
 class QuadratureIntegrator(IntegratorBase):
@@ -55,5 +54,4 @@ class QuadratureIntegrator(IntegratorBase):
         weights = alpha * transmittance
         
         rgbs = torch.sum(weights.unsqueeze(-1) * radiance, dim=1)
-        # print(f">>> rgbs {rgbs}")
         return rgbs, weights

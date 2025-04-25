@@ -56,7 +56,7 @@ class NeRF(nn.Module):
             nn.ReLU(),
             nn.Linear(feat_dim, feat_dim),
         )
-        self.sigma = nn.Sequential(nn.Linear(feat_dim, 1), nn.ReLU())
+        self.sigma = nn.Sequential(nn.Linear(feat_dim, 1), nn.Softplus())
         self.color = nn.Sequential(
             nn.Linear(feat_dim + view_dir_dim, feat_dim // 2),
             nn.ReLU(),

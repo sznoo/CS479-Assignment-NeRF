@@ -32,7 +32,6 @@ from torch_nerf.runners.utils import (
 import torch_nerf.src.cameras.cameras as cameras
 from torch_nerf.src.utils.data import NeRFBlenderDataset, LLFFDataset
 
-import time
 
 
 def init_dataset_and_loader(cfg: DictConfig):
@@ -168,7 +167,7 @@ def train_one_epoch(
         coarse_loss = loss_func(
             pixel_gt[pixel_indices, ...].to(coarse_pred), coarse_pred
         )
-        # loss += coarse_loss
+        loss += coarse_loss
         if "coarse_loss" not in loss_dict:
             loss_dict["coarse_loss"] = coarse_loss.item()
         else:
